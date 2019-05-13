@@ -20,6 +20,29 @@ class AppFixtures extends Fixture
      * @var \Faker\Factory
      */
     private $faker;
+
+    public const USERS =[
+      [
+          "username"=>"samurai",
+          "password" => "Suyog@100",
+          "name" => "Suyog Mishal",
+          "email" => "suyog15122@gmail.com"
+      ],
+        [
+            "username"=>"domnico",
+            "password" => "Suyog@100",
+            "name" => "Domnic Fernandes",
+            "email" => "dom@gmail.com"
+        ],
+        [
+            "username"=>"marshall",
+            "password" => "Suyog@100",
+            "name" => "Marshall Fernandes-",
+            "email" => "marshall@gmail.com"
+        ],
+
+    ];
+
     public function __construct(UserPasswordEncoderInterface $encoder)
     {
 
@@ -40,13 +63,14 @@ class AppFixtures extends Fixture
 
     public function loadPost(ObjectManager $manager){
 
-        $user = $this->getReference('user_admin');
+
 
         for ($i = 0; $i<50; $i++){
             $post = new Posts();
             $post->setTitle($this->faker->realText(30));
             $post->setPublished($this->faker->dateTimeThisYear);
-            $post->setAuthor($user);
+            $authorRef = $this->getRandomUsers();
+            $post->setAuthor($this->getReference($authorRef));
             $post->setContent($this->faker->realText());
             $this->addReference("post_$i",$post);
 
@@ -65,7 +89,9 @@ class AppFixtures extends Fixture
                 $comment = new Comment();
                 $comment->setContent($this->faker->realText());
                 $comment->setPublished($this->faker->dateTimeThisYear);
-                $comment->setAuthor($this->getReference('user_admin'));
+                $authorRef = $this->getRandomUsers();
+
+                $comment->setAuthor($this->getReference($authorRef));
                 $comment->setPost($this->getReference("post_$i"));
                 $manager->persist($comment);
 
@@ -78,16 +104,32 @@ class AppFixtures extends Fixture
             }
 
     public function loadUsers(ObjectManager $manager){
-        $user = new User();
-        $user->setUsername('admin');
-        $user->setEmail('suyog15122@gmail.com');
-        $user->setName("suyog mishal");
-        $user->setPassword($this->encoder->encodePassword($user,'suyog@100'));
 
-        $this->addReference('user_admin', $user);
+        foreach (self::USERS as $user){
 
-        $manager->persist($user);
+
+            $userEntity = new User();
+            $userEntity->setUsername($user['username']);
+            $userEntity->setEmail($user['email']);
+            $userEntity->setName($user['name']);
+            $userEntity->setPassword($this->encoder->encodePassword($userEntity,$user['password']));
+
+            $this->addReference('user_'.$user['username'], $userEntity);
+
+            $manager->persist($userEntity);
+
+        }
+
+
         $manager->flush();
+    }
+
+    /**
+     * @return string
+     */
+    public function getRandomUsers(): string
+    {
+        return 'user_' . self::USERS[rand(0,2)]['username'];
     }
 
 }
