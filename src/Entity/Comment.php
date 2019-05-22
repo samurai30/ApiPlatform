@@ -17,14 +17,16 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     }
  * },
  *     collectionOperations={
+ *     "get",
+ *     "post"={
+ *             "access_control"="is_granted('IS_AUTHENTICATED_FULLY')"
+ *     }
+ *     },
+ *     subresourceOperations={
  *     "api_posts_comments_get_subresource"={
  *          "normalization_context"={
  *                 "groups" = {"getComments"}
  *          }
- *     },
- *     "get",
- *     "post"={
- *             "access_control"="is_granted('IS_AUTHENTICATED_FULLY')"
  *     }
  *     },
  *     denormalizationContext={
