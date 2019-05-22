@@ -34,11 +34,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     collectionOperations={
  *     "post"={
  *          "denormalization_context"={
- *           "groups" = {"post"}
- *   },
- *     "normalization_context"={
- *          "groups" = {"get"}
- *     }
+ *                "groups" = {"post"}
+ *               },
+ *         "normalization_context"={
+ *                "groups" = {"get"}
+ *                }
  *     }
  * },
  * )
@@ -58,7 +58,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get","post"})
+     * @Groups({"get","post","getComments"})
      * @Assert\NotBlank(message="input username please")
      * @Assert\Length(min="5",max="240",maxMessage="too long",minMessage="too short")
      */
@@ -106,7 +106,7 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get","post","put"})
+     * @Groups({"get","post","put","getComments"})
      * @Assert\NotBlank(message="input name please")
      * @Assert\Length(min="3",max="200")
      */

@@ -16,10 +16,17 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "access_control"="is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user"
  *     }
  * },
- *     collectionOperations={"get",
+ *     collectionOperations={
+ *     "api_posts_comments_get_subresource"={
+ *          "normalization_context"={
+ *                 "groups" = {"getComments"}
+ *          }
+ *     },
+ *     "get",
  *     "post"={
  *             "access_control"="is_granted('IS_AUTHENTICATED_FULLY')"
- *     }},
+ *     }
+ *     },
  *     denormalizationContext={
  *          "groups"={"post"}
  *     }
@@ -32,6 +39,7 @@ class Comment implements AuthoredEntityInterface,PublishedDateEntityInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"getComments"})
      */
     private $id;
 
@@ -39,18 +47,20 @@ class Comment implements AuthoredEntityInterface,PublishedDateEntityInterface
      * @ORM\Column(type="text")
      * @Assert\NotBlank()
      * @Assert\Length(min="5",max="3000")
-     * @Groups({"post"})
+     * @Groups({"post","getComments"})
      */
     private $content;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"getComments"})
      */
     private $published;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"getComments"})
      */
     private $author;
 
