@@ -13,7 +13,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource(
- *     itemOperations={"get",
+ *     itemOperations={"get"={
+ *     "normalization_context"={
+ *          "groups"={"getCommentsAuthor"}
+ *     }
+ *     },
  *     "put"={
  *     "access_control"="is_granted('IS_AUTHENTICATED_FULLY') and object.getAuthor() == user"
  *     }
@@ -36,6 +40,7 @@ class Posts implements AuthoredEntityInterface,PublishedDateEntityInterface
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"getCommentsAuthor"})
      */
     private $id;
 
@@ -43,7 +48,7 @@ class Posts implements AuthoredEntityInterface,PublishedDateEntityInterface
      * @ORM\Column(type="string", length=50)
      * @Assert\NotBlank()
      * @Assert\Length(min="10")
-     * @Groups({"post"})
+     * @Groups({"post","getCommentsAuthor"})
      */
     private $title;
 
@@ -51,24 +56,27 @@ class Posts implements AuthoredEntityInterface,PublishedDateEntityInterface
      * @ORM\Column(type="text")
      * @Assert\NotBlank()
      * @Assert\Length(min="20")
-     * @Groups({"post"})
+     * @Groups({"post","getCommentsAuthor"})
      */
     private $content;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="posts")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"getCommentsAuthor"})
      */
     private $author;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups({"getCommentsAuthor"})
      */
     private $published;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="post")
      * @ApiSubresource()
+     * @Groups({"getCommentsAuthor"})
      */
     private $comments;
 
