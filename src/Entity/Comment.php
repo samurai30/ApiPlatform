@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource(
@@ -18,7 +19,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     collectionOperations={"get",
  *     "post"={
  *             "access_control"="is_granted('IS_AUTHENTICATED_FULLY')"
- *     }}
+ *     }},
+ *     denormalizationContext={
+ *          "groups"={"post"}
+ *     }
  * )
  * @ORM\Entity(repositoryClass="App\Repository\CommentRepository")
  */
@@ -33,6 +37,9 @@ class Comment implements AuthoredEntityInterface,PublishedDateEntityInterface
 
     /**
      * @ORM\Column(type="text")
+     * @Assert\NotBlank()
+     * @Assert\Length(min="5",max="3000")
+     * @Groups({"post"})
      */
     private $content;
 
@@ -50,6 +57,7 @@ class Comment implements AuthoredEntityInterface,PublishedDateEntityInterface
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Posts", inversedBy="comments")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"post"})
      */
     private $post;
 
