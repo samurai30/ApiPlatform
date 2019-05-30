@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\Validator\Constraints\UserPassword;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -71,45 +72,6 @@ class User implements UserInterface
      */
     private $username;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Groups({"post","put"})
-     * @Assert\NotBlank(message="input password please")
-     * @Assert\Regex(
-     *     pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/",
-     *     message="Password must be 6 character long and contains at least one digit, one Upper case letter and one Lower case letter"
-     * )
-     */
-    private $password;
-
-
-    /**
-     * @Assert\NotBlank()
-     * @Groups({"post","put"})
-     * @Assert\Expression(
-     *     "this.getPassword() === this.getRetypePassword()",
-     *     message="Password does not match"
-     * )
-     */
-    private $retypePassword;
-
-    /**
-     * @return mixed
-     */
-    public function getRetypePassword()
-    {
-        return $this->retypePassword;
-    }
-
-    /**
-     * @param mixed $retypePassword
-     */
-    public function setRetypePassword($retypePassword): void
-    {
-        $this->retypePassword = $retypePassword;
-    }
-
-
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -145,12 +107,120 @@ class User implements UserInterface
      */
     private $roles;
 
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Groups({"post"})
+     * @Assert\NotBlank(message="input password please")
+     * @Assert\Regex(
+     *     pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/",
+     *     message="Password must be 6 character long and contains at least one digit, one Upper case letter and one Lower case letter"
+     * )
+     */
+    private $password;
+
+
+    /**
+     * @Assert\NotBlank()
+     * @Groups({"post"})
+     * @Assert\Expression(
+     *     "this.getPassword() === this.getRetypePassword()",
+     *     message="Password does not match"
+     * )
+     */
+    private $retypePassword;
+
+    /**
+     * @Groups({"put-reset-password"})
+     * @Assert\NotBlank(message="input password please")
+     * @Assert\Regex(
+     *     pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/",
+     *     message="Password must be 6 character long and contains at least one digit, one Upper case letter and one Lower case letter"
+     * )
+     */
+    private $newPassword;
+    /**
+     * @Assert\NotBlank()
+     * @Groups({"put-reset-password"})
+     * @Assert\Expression(
+     *     "this.getNewPassword() === this.getNewRetypePassword()",
+     *     message="Password does not match"
+     * )
+     */
+    private $newRetypePassword;
+
+
+
+    /**
+     * @Groups({"put-reset-password"})
+     * @Assert\NotBlank()
+     * @UserPassword()
+     */
+    private $oldPassword;
+
+
+
+    public function getNewPassword(): ?string
+    {
+        return $this->newPassword;
+    }
+
+
+    public function setNewPassword($newPassword): void
+    {
+        $this->newPassword = $newPassword;
+    }
+
+
+    public function getNewRetypePassword(): ?string
+    {
+        return $this->newRetypePassword;
+    }
+
+
+    public function setNewRetypePassword($newRetypePassword): void
+    {
+        $this->newRetypePassword = $newRetypePassword;
+    }
+
+    public function getOldPassword(): ?string
+    {
+        return $this->oldPassword;
+    }
+
+
+    public function setOldPassword($oldPassword): void
+    {
+        $this->oldPassword = $oldPassword;
+    }
+
+
+
     public function __construct()
     {
         $this->roles = self::DEFAULT_ROLES;
         $this->posts = new ArrayCollection();
         $this->comments = new ArrayCollection();
     }
+
+
+    /**
+     * @return mixed
+     */
+    public function getRetypePassword()
+    {
+        return $this->retypePassword;
+    }
+
+    /**
+     * @param mixed $retypePassword
+     */
+    public function setRetypePassword($retypePassword): void
+    {
+        $this->retypePassword = $retypePassword;
+    }
+
+
 
     public function getId(): ?int
     {
@@ -279,7 +349,7 @@ class User implements UserInterface
      * and populated in any number of different ways when the user object
      * is created.
      *
-     * @return (Role|string)[] The user roles
+     * @return array (Role|string)[] The user roles
      */
     public function getRoles()
     {
