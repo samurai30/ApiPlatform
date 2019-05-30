@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\Validator\Constraints\UserPassword;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-
+use App\Controller\ResetPasswordAction;
 
 /**
  * @ApiResource(
@@ -30,6 +30,15 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "normalization_context"={
  *          "groups" = {"get"}
  *     }
+ *     },
+ *     "put-reset-password"={
+ *     "access_control"="is_granted('IS_AUTHENTICATED_FULLY') and object == user",
+ *     "method"="PUT",
+ *     "path"="/users/{id}/reset-password",
+ *     "controller"=ResetPasswordAction::class,
+ *     "denormalization_context"={
+ *          "groups" = {"put-reset-password"}
+ *                 }
  *     }
  *     },
  *     collectionOperations={
@@ -67,8 +76,8 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"get","post","getComments","getCommentsAuthor"})
-     * @Assert\NotBlank(message="input username please")
-     * @Assert\Length(min="5",max="240",maxMessage="too long",minMessage="too short")
+     * @Assert\NotBlank(message="input username please",groups={"post"})
+     * @Assert\Length(min="5",max="240",maxMessage="too long",minMessage="too short",groups={"post"})
      */
     private $username;
 
@@ -76,16 +85,16 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"get","post","put","getComments","getCommentsAuthor"})
-     * @Assert\NotBlank(message="input name please")
-     * @Assert\Length(min="3",max="200")
+     * @Assert\NotBlank(message="input name please",groups={"post","put"})
+     * @Assert\Length(min="3",max="200",groups={"post","put"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"post","put","get-admin","get-owner"})
-     * @Assert\NotBlank(message="input email please")
-     * @Assert\Email(message="Not A valid email")
+     * @Assert\NotBlank(message="input email please",groups={"post","put"})
+     * @Assert\Email(message="Not A valid email",groups={"post","put"})
      */
     private $email;
 
@@ -111,21 +120,22 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"post"})
-     * @Assert\NotBlank(message="input password please")
+     * @Assert\NotBlank(message="input password please",groups={"post"})
      * @Assert\Regex(
      *     pattern="/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).{6,}/",
-     *     message="Password must be 6 character long and contains at least one digit, one Upper case letter and one Lower case letter"
+     *     message="Password must be 6 character long and contains at least one digit, one Upper case letter and one Lower case letter",
+     *     groups={"post"}
      * )
      */
     private $password;
 
 
     /**
-     * @Assert\NotBlank()
+     * @Assert\NotBlank(groups={"post"})
      * @Groups({"post"})
      * @Assert\Expression(
      *     "this.getPassword() === this.getRetypePassword()",
-     *     message="Password does not match"
+     *     message="Password does not match",groups={"post"}
      * )
      */
     private $retypePassword;
